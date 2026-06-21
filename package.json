@@ -30,7 +30,7 @@
         "js-yaml": "^4.1.0",
         "marked": "^9.1.2",
         "oauth-1.0a": "^2.2.6",
-        "winston": "^3.11.0"
+        "winston": "^3.19.0"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.2",
