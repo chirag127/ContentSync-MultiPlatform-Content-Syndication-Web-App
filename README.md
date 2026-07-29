@@ -1,108 +1,126 @@
-# Omni-Publisher Content Ecosystem
+# DDGS MCP Server
 
-A powerful "Write Once, Publish Everywhere" automation system that syndicates Markdown content to multiple blogging platforms and generates a static website.
+[![Live](https://img.shields.io/badge/live-ddgs--mcp--server.oriz.in-blue)](https://ddgs-mcp-server.oriz.in)
+[![Stars](https://img.shields.io/github/stars/chirag127/ddgs-mcp-server?style=social)](https://github.com/chirag127/ddgs-mcp-server/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/chirag127/ddgs-mcp-server/blob/main/LICENSE)
 
-## 🚀 Features
+A Model Context Protocol (MCP) server that provides DuckDuckGo Search capabilities to AI agents.
 
--   **Multi-Platform Syndication**: Publish to Dev.to, Hashnode, Medium, WordPress, Blogger, Tumblr, Wix, Write.as, Telegraph, and Micro.blog.
--   **Static Site Generator**: Automatically builds a fast, SEO-friendly static site from your markdown files.
--   **Idempotency**: Tracks published posts in `.postmap.json` to prevent duplicates and enable updates.
--   **Robust CLI**: Supports `--dry-run`, `--mock`, and concurrency limits.
--   **CI/CD Ready**: GitHub Actions for automated deployment and publishing.
+**Live page:** https://ddgs-mcp-server.oriz.in
 
-## ⚠️ Important Notes
+## Features
 
--   **Ghost Platform Removed**: As per requirements, Ghost support has been completely removed.
--   **Substack Support**: The Substack API is **unofficial and undocumented**. The adapter included is a placeholder/stub to acknowledge the platform but avoids using fragile reverse-engineered methods that could lead to account bans.
--   **API Research**: All adapters were implemented based on **two fresh web searches** performed during the initialization of this project to ensure the latest API endpoints and authentication methods are used.
+- **search_text**: Advanced metasearch using `bing`, `brave`, `duckduckgo`, `google`, `mojeek`, `yahoo`, `yandex`, `wikipedia`.
+  - **Full Content Extraction**: Optionally fetch complete page content (not just snippets) for comprehensive context.
+- **search_news**: Find latest updates, releases, and tech news.
 
-## 🛠️ Setup
+## Full Content Extraction
 
-1.  **Clone the repository:**
-    \`\`\`bash
-    git clone https://github.com/chirag127/omni-publisher3.git
-    cd omni-publisher3
-    \`\`\`
+For coding agents that need complete context from search results, enable full page content fetching:
 
-2.  **Install dependencies:**
-    \`\`\`bash
-    npm install
-    \`\`\`
+### Usage
 
-3.  **Configure Environment:**
-    Copy `.env.example` to `.env` and fill in your API keys.
-    \`\`\`bash
-    cp .env.example .env
-    \`\`\`
+```json
+{
+  "query": "python async programming tutorial",
+  "fetch_full_content": true,
+  "max_content_length": 50000,
+  "max_results": 5
+}
+```
 
-## 🔑 Environment Variables
+### Parameters
 
-| Variable                   | Description                                            |
-| :------------------------- | :----------------------------------------------------- |
-| `DEVTO_API_KEY`            | API Key from Dev.to Settings > Extensions              |
-| `HASHNODE_TOKEN`           | Personal Access Token from Hashnode Developer Settings |
-| `MEDIUM_INTEGRATION_TOKEN` | Integration Token from Medium Settings                 |
-| `WP_ACCESS_TOKEN`          | WordPress Application Password                         |
-| `BLOGGER_CLIENT_ID`        | Google Cloud OAuth Client ID                           |
-| `TUMBLR_CONSUMER_KEY`      | Tumblr OAuth Consumer Key                              |
-| `WIX_API_TOKEN`            | Wix API Key with Blog permissions                      |
-| `WRITEAS_API_TOKEN`        | Write.as Auth Token                                    |
-| `TELEGRAPH_ACCESS_TOKEN`   | Telegraph Account Access Token                         |
-| `MICROBLOG_TOKEN`          | Micro.blog App Token                                   |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `fetch_full_content` | boolean | `false` | Enable full page content extraction |
+| `max_content_length` | integer | `50000` | Maximum characters per page (when `fetch_full_content` is true) |
 
-_(See `.env.example` for the full list)_
+### Response Structure
 
-## 📦 Usage
+When `fetch_full_content` is enabled, each result includes a `full_content` field:
 
-### CLI Commands
+```json
+[
+  {
+    "title": "Python Async Programming Guide",
+    "href": "https://example.com/python-async",
+    "body": "Brief snippet from search results...",
+    "full_content": "Complete extracted article text with all paragraphs, code examples, and detailed explanations..."
+  }
+]
+```
 
--   **Publish all posts:**
-    \`\`\`bash
-    npm run publish
-    \`\`\`
+### Performance Notes
 
--   **Dry Run (Simulate without publishing):**
-    \`\`\`bash
-    npm run publish:dry
-    \`\`\`
+- Content extraction adds ~1-3 seconds latency per page
+- Up to 5 pages are fetched concurrently to minimize total time
+- Failed fetches return `[Content extraction failed or blocked]` without breaking the search
+- Uses [Trafilatura](https://trafilatura.readthedocs.io/) for high-quality text extraction
 
--   **Mock Mode (Test with local mock server):**
-    \`\`\`bash
 
-    # Terminal 1
+## Installation & Usage
 
-    npm run start:mock
+You can run this server directly using `uvx` without installing it globally.
 
-    # Terminal 2
+### VS Code (Claude Desktop / Cline)
 
-    npm run publish:mock
-    \`\`\`
+Add this to your MCP settings file (e.g., `cline_mcp_settings.json` or `claude_desktop_config.json`):
 
--   **Build Static Site:**
-    \`\`\`bash
-    npm run build:site
-    \`\`\`
+```json
+{
+  "mcpServers": {
+    "ddgs-search": {
+      "command": "uvx",
+      "args": [
+        "ddgs-mcp-server"
+      ],
+      "disabled": false,
+      "alwaysAllow": []
+    }
+  }
+}
+```
 
-### GitHub Actions
+### Manual Execution
 
-1.  **Deploy Site**: Automatically builds and deploys the static site to GitHub Pages on push to `main`.
-2.  **Publish Sync**: Runs daily to sync new posts to all configured platforms.
-3.  **Issue to Post**: Label an issue with `publish` to automatically convert it into a blog post and commit it.
+```bash
+uvx ddgs-mcp-server
+```
 
-## 🧪 Testing
 
-Run the test suite (uses Jest and the Mock Server):
-\`\`\`bash
-npm test
-\`\`\`
+## Secrets & Configuration
 
-## 📝 Content Generation
+This project technically **does not require API keys** to run locally, as it scrapes DuckDuckGo. However, for **publishing** or **proxy usage**, you should configure your environment.
 
-The project includes a script to generate 50 SEO-optimized sample posts:
-\`\`\`bash
-npx ts-node src/generate-content.ts
-\`\`\`
+### 1. Set up Secrets
+Copy the example file:
+```bash
+cp .env.example .env
+```
 
-## 📄 License
+### 2. Required Tokens
 
-MIT
+| Token | Purpose | How to Get It |
+| :--- | :--- | :--- |
+| **PyPI API Token** | Publishing to PyPI | 1. Go to [PyPI Account Settings](https://pypi.org/manage/account/token/)<br>2. Select "Add API Token"<br>3. Scope to "Entire account" (for first publish)<br>4. Set as `TWINE_PASSWORD` in `.env` |
+| **Proxy URL** | Bypassing Blocks (Optional) | Use any HTTP/SOCKS5 proxy provider if you encounter rate limits. |
+
+## Development / Publishing
+
+To build and publish this package to PyPI (using the secrets from above):
+
+1.  **Build**:
+    ```bash
+    pip install build twine
+    python -m build
+    ```
+
+2.  **Publish** (loads secrets from .env if you export them, or prompts you):
+    ```bash
+    # If using .env variables (PowerShell)
+    # $env:TWINE_USERNAME = "__token__"
+    # $env:TWINE_PASSWORD = "pypi-..."
+
+    python -m twine upload dist/*
+    ```
