@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContentSync — Multi-Platform Content Syndication</title>
+<meta name="description" content="Write Markdown once, publish everywhere. A TypeScript CLI that syndicates Markdown posts to 11 blogging platforms and builds a static site.">
+<style>
+:root{--bg:#0b0e14;--panel:#141922;--fg:#e6edf3;--muted:#8b98a9;--accent:#4f9dff;--accent2:#7c5cff;--border:#232a36}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:820px;margin:0 auto;padding:0 24px}
+header{padding:96px 0 56px;text-align:center;background:radial-gradient(900px 400px at 50% -120px,rgba(79,157,255,.18),transparent)}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);font-weight:800;letter-spacing:-.02em;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{color:var(--muted);font-size:1.15rem;margin-top:16px}
+.btns{margin-top:32px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-block;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600;font-size:.95rem;transition:transform .15s,box-shadow .15s}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff}
+.btn.ghost{border:1px solid var(--border);color:var(--fg)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(79,157,255,.25)}
+section{padding:44px 0;border-top:1px solid var(--border)}
+h2{font-size:1.5rem;margin-bottom:20px;letter-spacing:-.01em}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card h3{font-size:1.05rem;margin-bottom:8px;color:var(--accent)}
+.card p{color:var(--muted);font-size:.92rem}
+.plats{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.chip{background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:7px 14px;font-size:.85rem;color:var(--muted)}
+pre{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;overflow-x:auto;font-size:.88rem}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#a6e3a1}
+footer{padding:48px 0 64px;text-align:center;color:var(--muted);font-size:.9rem;border-top:1px solid var(--border)}
+footer a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+<div class="wrap">
+<h1>ContentSync</h1>
+<p class="tag">Write Markdown once, publish everywhere. A TypeScript CLI that syndicates a folder of Markdown posts to 11 blogging platforms and generates a static site from the same source.</p>
+<div class="btns">
+<a class="btn primary" href="https://github.com/chirag127/ContentSync-MultiPlatform-Content-Syndication-Web-App">View on GitHub</a>
+<a class="btn ghost" href="https://github.com/chirag127/ContentSync-MultiPlatform-Content-Syndication-Web-App#setup">Install</a>
+</div>
+</div>
+</header>
+
+<div class="wrap">
+<section>
+<h2>What it does</h2>
+<div class="grid">
+<div class="card"><h3>Single source</h3><p>Markdown posts with YAML front-matter in <code>content/posts/</code>.</p></div>
+<div class="card"><h3>Idempotent</h3><p>Tracks per-post, per-platform state so re-runs update instead of duplicating.</p></div>
+<div class="card"><h3>Pluggable adapters</h3><p>One file per platform. Add a target by registering a new adapter.</p></div>
+<div class="card"><h3>Static site</h3><p>Builds an HTML site from the same Markdown source.</p></div>
+</div>
+</section>
+
+<section>
+<h2>Supported platforms</h2>
+<div class="plats">
+<span class="chip">Dev.to</span><span class="chip">Hashnode</span><span class="chip">Medium</span><span class="chip">WordPress</span><span class="chip">Blogger</span><span class="chip">Tumblr</span><span class="chip">Wix</span><span class="chip">Write.as</span><span class="chip">Telegraph</span><span class="chip">Micro.blog</span><span class="chip">Substack</span>
+</div>
+</section>
+
+<section>
+<h2>Quick start</h2>
+<pre><code>git clone https://github.com/chirag127/ContentSync-MultiPlatform-Content-Syndication-Web-App.git
+cd ContentSync-MultiPlatform-Content-Syndication-Web-App
+npm install
+cp .env.example .env   # add tokens for platforms you use
+
+npm run publish            # publish everywhere
+npm run publish -- --dry-run
+npm run build-site         # generate static site</code></pre>
+</section>
+</div>
+
+<footer>
+<p>MIT Licensed &middot; <a href="https://github.com/chirag127/ContentSync-MultiPlatform-Content-Syndication-Web-App">chirag127/ContentSync</a></p>
+</footer>
+</body>
+</html>
