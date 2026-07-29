@@ -1,126 +1,83 @@
-# DDGS MCP Server
+# ContentSync — Multi-Platform Content Syndication
 
-[![Live](https://img.shields.io/badge/live-ddgs--mcp--server.oriz.in-blue)](https://ddgs-mcp-server.oriz.in)
-[![Stars](https://img.shields.io/github/stars/chirag127/ddgs-mcp-server?style=social)](https://github.com/chirag127/ddgs-mcp-server/stargazers)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/chirag127/ddgs-mcp-server/blob/main/LICENSE)
+[![Live](https://img.shields.io/badge/live-oriz.in-blue?style=flat-square)](https://contentsync-multiplatform-content-syndication-web-app.oriz.in)
+[![Stars](https://img.shields.io/github/stars/chirag127/ContentSync-MultiPlatform-Content-Syndication-Web-App?style=flat-square)](https://github.com/chirag127/ContentSync-MultiPlatform-Content-Syndication-Web-App)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://github.com/chirag127/ContentSync-MultiPlatform-Content-Syndication-Web-App/blob/main/LICENSE)
 
-A Model Context Protocol (MCP) server that provides DuckDuckGo Search capabilities to AI agents.
+Write Markdown once, publish everywhere. A TypeScript CLI that syndicates a folder of Markdown posts to 11 blogging platforms and generates a static website from the same source.
 
-**Live page:** https://ddgs-mcp-server.oriz.in
+**Live:** https://contentsync-multiplatform-content-syndication-web-app.oriz.in
 
-## Features
+## What it does
 
-- **search_text**: Advanced metasearch using `bing`, `brave`, `duckduckgo`, `google`, `mojeek`, `yahoo`, `yandex`, `wikipedia`.
-  - **Full Content Extraction**: Optionally fetch complete page content (not just snippets) for comprehensive context.
-- **search_news**: Find latest updates, releases, and tech news.
+- One source of truth: `content/posts/*.md` with YAML front-matter.
+- Publishes each post to every configured platform via pluggable adapters.
+- Idempotent: tracks per-post, per-platform state so re-runs update instead of duplicate.
+- Builds a static HTML site from the same Markdown.
+- `--dry-run` and `--mock` modes for safe local testing.
 
-## Full Content Extraction
+## Supported platforms
 
-For coding agents that need complete context from search results, enable full page content fetching:
+Dev.to, Hashnode, Medium, WordPress, Blogger, Tumblr, Wix, Write.as, Telegraph, Micro.blog, Substack.
 
-### Usage
+Each lives in `src/adapters/`; add a platform by dropping a new adapter and registering it in `src/adapters/index.ts`.
 
-```json
-{
-  "query": "python async programming tutorial",
-  "fetch_full_content": true,
-  "max_content_length": 50000,
-  "max_results": 5
-}
-```
-
-### Parameters
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `fetch_full_content` | boolean | `false` | Enable full page content extraction |
-| `max_content_length` | integer | `50000` | Maximum characters per page (when `fetch_full_content` is true) |
-
-### Response Structure
-
-When `fetch_full_content` is enabled, each result includes a `full_content` field:
-
-```json
-[
-  {
-    "title": "Python Async Programming Guide",
-    "href": "https://example.com/python-async",
-    "body": "Brief snippet from search results...",
-    "full_content": "Complete extracted article text with all paragraphs, code examples, and detailed explanations..."
-  }
-]
-```
-
-### Performance Notes
-
-- Content extraction adds ~1-3 seconds latency per page
-- Up to 5 pages are fetched concurrently to minimize total time
-- Failed fetches return `[Content extraction failed or blocked]` without breaking the search
-- Uses [Trafilatura](https://trafilatura.readthedocs.io/) for high-quality text extraction
-
-
-## Installation & Usage
-
-You can run this server directly using `uvx` without installing it globally.
-
-### VS Code (Claude Desktop / Cline)
-
-Add this to your MCP settings file (e.g., `cline_mcp_settings.json` or `claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "ddgs-search": {
-      "command": "uvx",
-      "args": [
-        "ddgs-mcp-server"
-      ],
-      "disabled": false,
-      "alwaysAllow": []
-    }
-  }
-}
-```
-
-### Manual Execution
+## Setup
 
 ```bash
-uvx ddgs-mcp-server
+git clone https://github.com/chirag127/ContentSync-MultiPlatform-Content-Syndication-Web-App.git
+cd ContentSync-MultiPlatform-Content-Syndication-Web-App
+npm install
+cp .env.example .env   # fill in the platform tokens you use
 ```
 
+Only the tokens for platforms you actually target are required — adapters missing credentials are skipped.
 
-## Secrets & Configuration
+## Usage
 
-This project technically **does not require API keys** to run locally, as it scrapes DuckDuckGo. However, for **publishing** or **proxy usage**, you should configure your environment.
-
-### 1. Set up Secrets
-Copy the example file:
 ```bash
-cp .env.example .env
+# Publish all posts to every configured platform
+npm run publish
+
+# Simulate without hitting any API
+npm run publish -- --dry-run
+
+# Run against the built-in mock server
+npm test
+
+# Generate the static site into ./public
+npm run build-site
 ```
 
-### 2. Required Tokens
+Options: `--dry-run`, `--mock`, `--concurrency <n>` (default 2).
 
-| Token | Purpose | How to Get It |
-| :--- | :--- | :--- |
-| **PyPI API Token** | Publishing to PyPI | 1. Go to [PyPI Account Settings](https://pypi.org/manage/account/token/)<br>2. Select "Add API Token"<br>3. Scope to "Entire account" (for first publish)<br>4. Set as `TWINE_PASSWORD` in `.env` |
-| **Proxy URL** | Bypassing Blocks (Optional) | Use any HTTP/SOCKS5 proxy provider if you encounter rate limits. |
+## Content format
 
-## Development / Publishing
+Each file in `content/posts/` is Markdown with front-matter:
 
-To build and publish this package to PyPI (using the secrets from above):
+```markdown
+---
+title: My Post Title
+slug: my-post-title
+tags: [tech, india]
+---
 
-1.  **Build**:
-    ```bash
-    pip install build twine
-    python -m build
-    ```
+Post body in Markdown.
+```
 
-2.  **Publish** (loads secrets from .env if you export them, or prompts you):
-    ```bash
-    # If using .env variables (PowerShell)
-    # $env:TWINE_USERNAME = "__token__"
-    # $env:TWINE_PASSWORD = "pypi-..."
+State lives in `.postmap.json` (slug -> platform -> {id, url, lastUpdated}) so republishing updates existing posts rather than creating duplicates.
 
-    python -m twine upload dist/*
-    ```
+## Project layout
+
+```
+content/posts/     Markdown source posts
+src/publish.ts     CLI entrypoint — publish orchestration
+src/build-site.ts  static-site generator
+src/adapters/      one file per platform
+src/utils/         markdown parsing, state, logging
+scripts/           content generation helpers
+```
+
+## License
+
+MIT — see [LICENSE](LICENSE).
